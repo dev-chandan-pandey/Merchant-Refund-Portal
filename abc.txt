@@ -1,0 +1,20 @@
+mkdir -p backend/src/{socket,db,types}
+cat > backend/src/server.ts <<'TS'\nimport http from \"http\";\nconst PORT = process.env.PORT || 3000;\nconst server = http.createServer((req, res) => {\n  res.writeHead(200, { \"Content-Type\": \"text/plain\" });\n  res.end(\"Anonymous chat backend running\\n\");\n});\nserver.listen(Number(PORT), () => { console.log(`Server listening on port ${PORT}`); });\nexport default server;\nTS
+
+# Add other files (examples)\ncat > backend/src/socket/index.ts <<'TS'\nimport { Server as HttpServer } from \"http\";\nimport { Matchmaker } from \"./matchmaking\";\nexport function initSockets(server: HttpServer) { }\nexport { Matchmaker };\nTS
+
+cat > backend/src/socket/matchmaking.ts <<'TS'\nexport class Matchmaker { private queue: string[] = []; enqueue(id: string){ this.queue.push(id); } dequeue(){ return this.queue.shift(); } size(){ return this.queue.length; } }\nexport default Matchmaker;\nTS
+
+cat > backend/src/socket/rateLimiter.ts <<'TS'\nexport function rateLimit(clientId: string): boolean { return true; }\nexport default rateLimit;\nTS
+
+cat > backend/src/db/index.ts <<'TS'\nimport path from \"path\";\nexport const DB_PATH = path.resolve(__dirname, \"./database.sqlite\");\nexport function initDb(){ return { path: DB_PATH }; }\nexport default initDb;\nTS
+
+cat > backend/src/db/schema.sql <<'SQL'\nCREATE TABLE IF NOT EXISTS messages (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  sender TEXT NOT NULL,\n  recipient TEXT,\n  message TEXT NOT NULL,\n  created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n);\nSQL
+
+cat > backend/src/types/socket.types.ts <<'TS'\nexport interface SocketPayload { userId: string; message: string; metadata?: Record<string, unknown>; }\nexport type UserId = string;\nTS
+
+cat > backend/tsconfig.json <<'JSON'\n{\n  \"compilerOptions\": {\"target\":\"ES2020\",\"module\":\"CommonJS\",\"rootDir\":\"src\",\"outDir\":\"dist\",\"strict\":true,\"esModuleInterop\":true,\"skipLibCheck\":true,\"resolveJsonModule\":true,\"forceConsistentCasingInFileNames\":true},\n  \"include\":[\"src\"]\n}\nJSON
+
+cat > backend/package.json <<'JSON'\n{\n  \"name\":\"anonymous-chat-backend\",\"version\":\"0.1.0\",\"private\":true,\n  \"scripts\":{\"dev\":\"ts-node-dev --respawn --transpile-only src/server.ts\",\"start\":\"node dist/server.js\"},\n  \"dependencies\":{},\"devDependencies\":{}\n}\nJSON
+
+cat > backend/.env.example <<'ENV'\nPORT=3000\nDATABASE_URL=sqlite:./database.sqlite\nENV

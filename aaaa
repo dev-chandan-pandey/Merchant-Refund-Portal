@@ -1,0 +1,2 @@
+bcrypt.hash(password, 10)
+bcrypt.compare()
