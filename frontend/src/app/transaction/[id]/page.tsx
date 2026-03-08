@@ -1,19 +1,14 @@
-"use client"
+"use client";
 
-import { useParams } from "next/navigation"
-import TransactionDetail from "@/components/TransactionDetail"
+import { Suspense, use } from "react";
+import TransactionDetail from "@/components/TransactionDetail";
 
-export default function Page(){
+export default function TransactionPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params); // ✅ unwrap with React.use()
 
-  const {id} = useParams()
-
-  return(
-
-    <div className="p-8">
-
-      <TransactionDetail id={id}/>
-
-    </div>
-
-  )
+  return (
+    <Suspense fallback={<p>Loading transaction...</p>}>
+      <TransactionDetail id={id} />
+    </Suspense>
+  );
 }

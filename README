@@ -1,0 +1,245 @@
+# Merchant Refund Portal
+
+A full-stack production-grade refund management system where merchants can view transactions and initiate refunds while enforcing strict eligibility rules.
+
+---
+
+# Live Application
+
+Frontend
+https://merchant-refund-portal-lime.vercel.app/
+
+Backend API
+https://merchant-refund-portal.onrender.com
+
+---
+
+# Test Credentials
+
+Merchant 1
+Email: [merchant1@test.com](mailto:merchant1@test.com)
+Password: Test@1234
+
+Merchant 2
+Email: [merchant2@test.com](mailto:merchant2@test.com)
+Password: Test@1234
+
+---
+
+# Tech Stack
+
+Frontend
+
+* Next.js
+* TypeScript
+* React Query
+* TailwindCSS
+
+Backend
+
+* NestJS
+* TypeScript
+* JWT Authentication
+
+Database
+
+* MongoDB Atlas
+
+Deployment
+
+* Frontend: Vercel
+* Backend: Render
+* Database: MongoDB Atlas
+
+---
+
+# Architecture
+
+Frontend communicates with the backend via REST APIs.
+
+Frontend (Next.js)
+↓
+Backend (NestJS API)
+↓
+MongoDB Atlas
+
+---
+
+# Database Design
+
+Collections used:
+
+Merchants
+
+* email
+* passwordHash
+* name
+
+Transactions
+
+* transactionId
+* merchantId
+* amount
+* status
+* transactionDate
+
+Refunds
+
+* transactionId
+* merchantId
+* amount
+* reason
+
+TransactionStatusEvents
+
+* transactionId
+* status
+* timestamp
+
+---
+
+# Database Indexes
+
+Indexes were added to optimize filtering and pagination.
+
+transactionId
+merchantId
+status
+transactionDate
+
+These indexes allow efficient querying for:
+
+* pagination
+* transaction search
+* date range filtering
+* status filtering
+
+---
+
+# Refund Eligibility Rules
+
+The backend strictly enforces the following rules:
+
+1. Only transactions with status **Successful** can be refunded.
+2. A transaction can only be refunded **once**.
+3. Refund must be initiated within **30 days** of the transaction.
+4. Refund amount must be **less than or equal to the original amount**.
+5. **Partial refunds are supported.**
+
+All validation occurs on the backend to prevent client-side manipulation.
+
+---
+
+# Features
+
+Authentication
+
+* JWT login
+* Protected routes
+* Session persistence
+
+Transactions
+
+* Paginated transaction table
+* Server-side filtering
+* Transaction search
+* Date range filter
+
+Transaction Detail
+
+* Full transaction information
+* Status timeline
+
+Refund Flow
+
+* Refund form
+* Backend validation
+* Timeline update after refund
+
+UX
+
+* Loading states
+* Empty states
+* Error handling
+* Responsive layout
+
+---
+
+# Local Setup
+
+Clone the repository:
+
+git clone <repo-url>
+
+Backend setup:
+
+cd backend
+npm install
+npm run start:dev
+
+Frontend setup:
+
+cd frontend
+npm install
+npm run dev
+
+---
+
+# Environment Variables
+
+Example `.env`:
+
+MONGODB_URI=
+JWT_SECRET=
+PORT=3000
+
+Frontend:
+
+NEXT_PUBLIC_API_URL=
+
+---
+
+# Design Decisions
+
+Next.js was chosen for the frontend due to its built-in routing and seamless Vercel deployment.
+
+NestJS was selected for the backend due to its modular architecture and scalability.
+
+MongoDB Atlas was used as the database to support flexible schema design and easy cloud deployment.
+
+Server-side filtering was implemented to ensure efficient pagination and prevent large data transfers.
+
+---
+
+# Future Improvements
+
+* Unit tests for refund logic
+* Improved transaction filtering UI
+* Role-based access control
+* Audit logging for refunds
+
+Hello AndPayments Engineering Team,
+
+Please find my submission for the Full Stack Developer technical assignment.
+
+Live Application
+Frontend: https://merchant-refund-portal-lime.vercel.app/
+Backend API: https://merchant-refund-portal.onrender.com
+
+GitHub Repository <your github repo link>
+
+Test Credentials
+
+Merchant 1
+Email: [merchant1@test.com](mailto:merchant1@test.com)
+Password: Test@1234
+
+Merchant 2
+Email: [merchant2@test.com](mailto:merchant2@test.com)
+Password: Test@1234
+
+The README includes architecture decisions, database design, indexing strategy, and setup instructions.
+
+Thank you for reviewing my submission.
+
+Best regards <Your Name>
