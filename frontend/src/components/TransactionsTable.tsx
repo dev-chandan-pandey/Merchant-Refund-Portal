@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Search, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 export default function TransactionsTable() {
   const router = useRouter();
@@ -24,172 +25,147 @@ export default function TransactionsTable() {
     },
   });
 
-  const changePage = (p: number) => {
-    router.push(
-      `/dashboard?page=${p}&status=${status}&search=${search}&fromDate=${fromDate}&toDate=${toDate}`
-    );
+  // Helper to handle URL updates without custom functions
+  const updateFilters = (key: string, value: string) => {
+    const newParams = new URLSearchParams(params.toString());
+    if (value) {
+      newParams.set(key, value);
+    } else {
+      newParams.delete(key);
+    }
+    newParams.set("page", "1"); 
+    router.push(`/dashboard?${newParams.toString()}`);
   };
 
- if (isLoading) {
+  if (isLoading) {
+    return (
+      <div className="w-full space-y-4">
+        <div className="h-10 w-64 bg-gray-200 animate-pulse rounded-lg" />
+        <div className="h-96 w-full bg-gray-100 animate-pulse rounded-xl" />
+      </div>
+    );
+  }
+
+  const { transactions, pagination } = data;
 
   return (
-
-    <div className="bg-white rounded-xl border p-6">
-
-      <div className="animate-pulse space-y-4">
-
-        {Array.from({length:8}).map((_,i)=>(
-
-          <div
-            key={i}
-            className="h-10 bg-gray-200 rounded"
+    <div className="space-y-6">
+      {/* Search and Filters Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="relative w-full lg:max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            placeholder="Search by ID..."
+            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+            defaultValue={search}
+            onBlur={(e) => updateFilters("search", e.target.value)}
           />
-
-        ))}
-
-      </div>
-
-    </div>
-
-  )
-
-}
-
-  const transactions = data.transactions;
-
-  return (
-    <div>
-      {/* Filters */}
-      <div className="mb-4 flex gap-2 flex-wrap">
-        <input
-          placeholder="Search transaction"
-          className="border p-2"
-          defaultValue={search}
-          onBlur={(e) => {
-            router.push(
-              `/dashboard?page=1&search=${e.target.value}&status=${status}&fromDate=${fromDate}&toDate=${toDate}`
-            );
-          }}
-        />
-
-        <input
-          type="date"
-          className="border p-2"
-          defaultValue={fromDate}
-          onChange={(e) => {
-            router.push(
-              `/dashboard?page=1&search=${search}&status=${status}&fromDate=${e.target.value}&toDate=${toDate}`
-            );
-          }}
-        />
-
-        <input
-          type="date"
-          className="border p-2"
-          defaultValue={toDate}
-          onChange={(e) => {
-            router.push(
-              `/dashboard?page=1&search=${search}&status=${status}&fromDate=${fromDate}&toDate=${e.target.value}`
-            );
-          }}
-        />
-
-        {/* ✅ Status filter */}
-        <select
-          className="border p-2"
-          value={status}
-          onChange={(e) => {
-            router.push(
-              `/dashboard?page=1&status=${e.target.value}&search=${search}&fromDate=${fromDate}&toDate=${toDate}`
-            );
-          }}
-        >
-          <option value="">All Status</option>
-          <option value="Successful">Successful</option>
-          <option value="Failed">Failed</option>
-          <option value="Pending">Pending</option>
-          <option value="Refunded">Refunded</option>
-        </select>
-      </div>
-
-      {/* Transactions table */}
-      <table className="w-full border">
-        <thead>
-          <tr className="border-b">
-            <th className="p-2">Transaction ID</th>
-            <th className="p-2">Amount</th>
-            <th className="p-2">Status</th>
-            <th className="p-2">Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {transactions.map((t: any) => (
-            <tr
-              key={t.transactionId}
-              className="border-b cursor-pointer"
-              onClick={() => router.push(`/transaction/${t.transactionId}`)}
-            >
-              <td className="p-2">{t.transactionId}</td>
-              <td className="p-2">{t.amount}</td>
-              <td className="p-2">{t.status}</td>
-              <td className="p-2">
-                {new Date(t.transactionDate).toLocaleDateString()}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-between mt-6">
-
-        <p className="text-sm text-gray-500">
-          Page {page} of {data.pagination.pages}
-        </p>
-
-        <div className="flex items-center gap-2">
-
-          {/* Previous Button */}
-
-          <button
-            disabled={Number(page) === 1}
-            className="px-3 py-1 text-sm border rounded-md disabled:opacity-40"
-            onClick={() => changePage(Number(page) - 1)}
-          >
-            Previous
-          </button>
-
-          {/* Page Numbers */}
-
-          {Array.from({ length: data.pagination.pages }).map((_, i) => {
-            const p = i + 1;
-
-            return (
-              <button
-                key={p}
-                className={`px-3 py-1 text-sm rounded-md border ${p === Number(page)
-                    ? "bg-black text-white"
-                    : "bg-white hover:bg-gray-100"
-                  }`}
-                onClick={() => changePage(p)}
-              >
-                {p}
-              </button>
-            );
-          })}
-
-          {/* Next Button */}
-
-          <button
-            disabled={Number(page) === data.pagination.pages}
-            className="px-3 py-1 text-sm border rounded-md disabled:opacity-40"
-            onClick={() => changePage(Number(page) + 1)}
-          >
-            Next
-          </button>
-
         </div>
 
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Date Range Group */}
+          <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 bg-white shadow-sm">
+            <Calendar className="h-4 w-4 text-gray-400" />
+            <input
+              type="date"
+              className="text-xs md:text-sm outline-none bg-transparent"
+              defaultValue={fromDate}
+              onChange={(e) => updateFilters("fromDate", e.target.value)}
+            />
+            <span className="text-gray-300">-</span>
+            <input
+              type="date"
+              className="text-xs md:text-sm outline-none bg-transparent"
+              defaultValue={toDate}
+              onChange={(e) => updateFilters("toDate", e.target.value)}
+            />
+          </div>
+
+          <select
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            value={status}
+            onChange={(e) => updateFilters("status", e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            <option value="Successful">Successful</option>
+            <option value="Failed">Failed</option>
+            <option value="Pending">Pending</option>
+            <option value="Refunded">Refunded</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Responsive Table Card */}
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-separate border-spacing-0">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Transaction ID</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {transactions.map((t: any) => (
+                <tr
+                  key={t.transactionId}
+                  className="group hover:bg-blue-50/50 cursor-pointer transition-colors"
+                  onClick={() => router.push(`/transaction/${t.transactionId}`)}
+                >
+                  <td className="px-6 py-4">
+                    <span className="font-mono text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      #{t.transactionId.slice(-8)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 font-bold text-gray-900">
+                    ${t.amount.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    {/* Status Logic using inline Tailwind */}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                      t.status === 'Successful' ? 'bg-green-50 text-green-700 border-green-200' :
+                      t.status === 'Failed' ? 'bg-red-50 text-red-700 border-red-200' :
+                      t.status === 'Pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                      'bg-gray-50 text-gray-600 border-gray-200'
+                    }`}>
+                      {t.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right text-gray-500 text-sm">
+                    {new Date(t.transactionDate).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Improved Pagination Bar */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            Page <span className="font-semibold text-gray-900">{page}</span> of <span className="font-semibold">{pagination.pages}</span>
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              disabled={Number(page) === 1}
+              onClick={() => updateFilters("page", String(Number(page) - 1))}
+              className="p-2 border border-gray-300 rounded-lg bg-white disabled:opacity-40 hover:bg-gray-100 transition-all shadow-sm"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            
+            <button
+              disabled={Number(page) === pagination.pages}
+              onClick={() => updateFilters("page", String(Number(page) + 1))}
+              className="p-2 border border-gray-300 rounded-lg bg-white disabled:opacity-40 hover:bg-gray-100 transition-all shadow-sm"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
